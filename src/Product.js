@@ -4,11 +4,11 @@ import { Title, Button, Card, Image } from 'rbx';
 
 const Product = ({ product }) => {
 
-    const fullImageLocation = "/data/" + product.sku + "_1.jpg";
-    const thumbnailImageLocation = "/data/" + product.sku + "_2.jpg";
+    const fullImageLocation = "/data/" + product.sku + "_2.jpg";
+    const thumbnailImageLocation = "/data/" + product.sku + "_1.jpg";
 
     return (
-        <Card fluid>
+        <Card>
             <Card.Header>
                 <Card.Header.Title>
                     { product.title }
@@ -18,10 +18,12 @@ const Product = ({ product }) => {
                 <Image src={thumbnailImageLocation} />
             </Card.Image>
             <Card.Content>
+                <div>
+                    {product.title}
+                </div>
                 {product.currencyFormat} { product.price }
-                <Button>+</Button>
             </Card.Content>
-
+            <Button id="addToCart">Add to Cart</Button>
         </Card>
     );
 }
