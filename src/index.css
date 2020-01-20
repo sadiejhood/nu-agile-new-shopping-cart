@@ -15,16 +15,15 @@ code {
 .card {
   width: 100%;
   text-align: center;
-  align-content: center;
+  justify-content: center;
   margin: 1%;
   padding: 3%;
 }
 
 .container {
-  width: 80%;
+  width: 70%;
+  padding-left: 30%;
   padding-top: 5%;
-  column-count: 3;
-  grid-row: auto
 }
 
 .title {

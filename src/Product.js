@@ -1,30 +1,37 @@
 import React, { useEffect, useState } from 'react';
-import 'rbx/index.css';
-import { Title, Button, Card, Image } from 'rbx';
+import { Button, Card, CardHeader, CardMedia, CardContent, Typography } from '@material-ui/core';
 
 const Product = ({ product }) => {
 
-    const fullImageLocation = "/data/" + product.sku + "_2.jpg";
-    const thumbnailImageLocation = "/data/" + product.sku + "_1.jpg";
+    const fullImageLocation = "/data/" + product.sku + "_1.jpg";
+    const thumbnailImageLocation = "/data/" + product.sku + "_2.jpg";
 
     return (
-        <Card>
-            <Card.Header>
-                <Card.Header.Title>
-                    { product.title }
-                </Card.Header.Title>
-            </Card.Header>
-            <Card.Image size='100%' >
-                <Image src={thumbnailImageLocation} />
-            </Card.Image>
-            <Card.Content>
-                <div>
-                    {product.title}
-                </div>
-                {product.currencyFormat} { product.price }
-            </Card.Content>
-            <Button id="addToCart">Add to Cart</Button>
-        </Card>
+            <Card className="card">
+                <CardContent>
+                    {(() => {
+                        switch (product.isFreeShipping) {
+                        case true:   return (<Typography style={{textAlign: 'right'}}> Free Shipping </Typography>);
+                        case false: return (<Typography style={{paddingTop: '10%'}}>  </Typography>);
+                        }
+                    })()}
+                </CardContent>
+                <CardMedia
+                    style={{height: '350px', width: '250px'}}
+                    image={fullImageLocation}
+                    title="Image of shirt"
+                />
+                    
+                <CardContent>
+                    <Typography gutterbottom style={{fontSize: '15px'}}>
+                        {product.title}
+                    </Typography>
+                    <Typography>
+                        {product.currencyFormat} { product.price.toFixed(2) }
+                    </Typography>
+                </CardContent>
+                <Button color='primary' fullWidth={true}>Add to Cart</Button>
+            </Card>
     );
 }
 
