@@ -4,7 +4,6 @@ import { Card, CardMedia, CardContent, Typography } from '@material-ui/core';
 const ShoppingCartItem = ({item}) => {
 
     const thumbnailImageLocation = "/data/" + item[0].sku + "_2.jpg";
-    console.log(item)
 
     return (
             <div style={{display: 'flex', flexDirection: 'row', width: '400px'}}>
@@ -20,6 +19,7 @@ const ShoppingCartItem = ({item}) => {
                     <Typography>
                         {item[0].currencyFormat} { item[0].price.toFixed(2) }
                     </Typography>
+                    <Typography>Size: {item[2]}</Typography>
                     <Typography>Quantity: {item[1]}</Typography>
                 </CardContent>
             </div>
