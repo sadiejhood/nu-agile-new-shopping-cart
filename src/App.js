@@ -40,6 +40,8 @@ const App = () => {
       tempCart[product.sku] = {item: product, quantity: 1}
       setTotalPrice(totalPrice + product.price)
     }
+
+    flipCart()
   
     setShoppingCartItems(tempCart)
   };
