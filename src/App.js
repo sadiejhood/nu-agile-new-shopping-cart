@@ -3,6 +3,8 @@ import Product from './Product.js';
 import ShoppingCartItem from './Components/ShoppingCartItem.js';
 import { Button, Container, GridList, GridListTile, Grid, Typography, Select, MenuItem, Drawer, Card, CardActionArea, CardContent} from '@material-ui/core';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
+import firebase from 'firebase/app';
+import 'firebase/database';
 
 const App = () => {
   const [data, setData] = useState({});
@@ -12,7 +14,23 @@ const App = () => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [products, setProducts] = useState([]);
   const [selectedSizes, setSelectedSizes] = useState([]);
-  const [selectedSize, setSelectedSize] = useState({})
+  const [selectedSize, setSelectedSize] = useState({});
+
+  var firebaseConfig = {
+    apiKey: "AIzaSyC3_638-M3CjvK14uhSIrrCUXn98VLgYRI",
+    authDomain: "nu-agile-new-shopping-cart.firebaseapp.com",
+    databaseURL: "https://nu-agile-new-shopping-cart.firebaseio.com",
+    projectId: "nu-agile-new-shopping-cart",
+    storageBucket: "nu-agile-new-shopping-cart.appspot.com",
+    messagingSenderId: "196855447533",
+    appId: "1:196855447533:web:ff33f3a9419f564c7c31e4"
+  };
+  // Initialize Firebase
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+ }
+
+ const db = firebase.database().ref();
 
   // var products = Object.values(data);
   const sizes = ['S', 'M', 'L', 'XL']
@@ -31,9 +49,15 @@ const App = () => {
 
   useEffect(() => {
     const fetchInventory = async () => {
-      const response = await fetch('./data/inventory.json');
-      const json = await response.json();
-      setInventory(json);
+      db.on('value', snap => {
+        if (snap.val()) setInventory((snap.val()));
+      }, error => alert(error));
+
+      console.log("updated!")
+
+      // const response = await fetch('./data/inventory.json');
+      // const json = await response.json();
+      // setInventory(json);
     };
     fetchInventory();
   }, []);
@@ -118,6 +142,7 @@ const App = () => {
     }
 
     var tempProducts = []
+    console.log(inventory)
     Object.keys(inventory).forEach((item) => {
       var sizePresent = false
       selectedSizes.forEach((sizes) => {
@@ -147,8 +172,8 @@ const App = () => {
           Sizes:
         </Typography>
         <Typography>
-          {sizes.map(size => 
-            <Button size="small" onClick={() => sortBySize(size)}>{size}</Button>
+          {sizes.map(s => 
+            <Button size="small" selected={selectedSizes.includes(s)} onClick={() => sortBySize(s)}>{s}</Button>
           )}
         </Typography>
       </Grid>

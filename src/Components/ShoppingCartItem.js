@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Card, CardMedia, CardContent, Typography } from '@material-ui/core';
+import { Card, CardMedia, CardContent, Typography, Container } from '@material-ui/core';
 
 const ShoppingCartItem = ({item}) => {
 
     const thumbnailImageLocation = "/data/" + item[0].sku + "_2.jpg";
 
     return (
+        <Container>
             <div style={{display: 'flex', flexDirection: 'row', width: '400px'}}>
                 <CardMedia
                         style={{height: '150px', width: '75px', float: 'left'}}
@@ -23,6 +24,7 @@ const ShoppingCartItem = ({item}) => {
                     <Typography>Quantity: {item[1]}</Typography>
                 </CardContent>
             </div>
+        </Container>
     );
 };
 
