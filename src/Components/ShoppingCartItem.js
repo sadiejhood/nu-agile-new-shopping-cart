@@ -7,7 +7,6 @@ const ShoppingCartItem = ({item}) => {
     console.log(item)
 
     return (
-        <Card style={{paddingLeft: '2%'}}>
             <div style={{display: 'flex', flexDirection: 'row', width: '400px'}}>
                 <CardMedia
                         style={{height: '150px', width: '75px', float: 'left'}}
@@ -24,7 +23,6 @@ const ShoppingCartItem = ({item}) => {
                     <Typography>Quantity: {item[1]}</Typography>
                 </CardContent>
             </div>
-        </Card>
     );
 };
 

@@ -23,7 +23,7 @@ const Product = ({ product }) => {
         />
             
         <CardContent>
-            <Typography gutterbottom style={{fontSize: '15px'}}>
+            <Typography style={{fontSize: '15px'}}>
                 {product.title}
             </Typography>
             <Typography>

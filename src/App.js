@@ -35,16 +35,34 @@ const App = () => {
   
     if (tempCart[product.sku]) {
       tempCart[product.sku].quantity = tempCart[product.sku].quantity + 1
+      setTotalPrice(totalPrice + product.price)
     } else {
       console.log("Adding....", product)
       tempCart[product.sku] = {item: product, quantity: 1}
       setTotalPrice(totalPrice + product.price)
     }
-
-    flipCart()
   
     setShoppingCartItems(tempCart)
   };
+
+  function removeFrom(product) {
+    var tempCart = {};
+    Object.keys(shoppingCartItems).forEach((element) => {
+      if (shoppingCartItems[element].item.sku === product.sku && shoppingCartItems[element].quantity === 1) {
+        // don't add
+      } else {
+        if (shoppingCartItems[element].item.sku === product.sku) {
+          tempCart[shoppingCartItems[element].item.sku] = {item: shoppingCartItems[element].item, quantity: shoppingCartItems[element].quantity - 1}  
+        } else {
+          tempCart[shoppingCartItems[element].item.sku] = {item: shoppingCartItems[element].item, quantity: shoppingCartItems[element].quantity}
+        }
+      }
+    });
+
+    setTotalPrice(totalPrice - product.price)
+
+    setShoppingCartItems(tempCart)
+  }
 
 
   return (
@@ -80,10 +98,10 @@ const App = () => {
           </Grid>
           <GridList cols={4} cellHeight={560}>
               {products.map(product => 
-                <GridListTile>
+                <GridListTile key={product.sku}>
                   <Card className="card">
                     <Product product={ product } ></Product>
-                    <Button color='primary' fullWidth={true} onClick={() => addToCart(product)}>Add to Cart</Button>
+                    <Button color='primary' fullWidth={true} onClick={() => {addToCart(product); flipCart();}}>Add to Cart</Button>
                   </Card>
                 </GridListTile>
               )}
@@ -107,8 +125,14 @@ const App = () => {
             {
               Object.keys(shoppingCartItems).map((item) => {
                 return (
-                  <Typography>
-                    <ShoppingCartItem item={[shoppingCartItems[item].item, shoppingCartItems[item].quantity]}></ShoppingCartItem>
+                  <Typography key={shoppingCartItems[item].item.sku}>
+                    <Card style={{paddingLeft: '2%', height:'200px'}}>
+                      <ShoppingCartItem item={[shoppingCartItems[item].item, shoppingCartItems[item].quantity]} />
+                      <div style={{paddingLeft: '60%'}}>
+                        <Button onClick={() => removeFrom(shoppingCartItems[item].item)}> - </Button>
+                        <Button onClick={() => addToCart(shoppingCartItems[item].item)}> + </Button>
+                      </div>
+                    </Card>
                   </Typography>
                 )
               })
