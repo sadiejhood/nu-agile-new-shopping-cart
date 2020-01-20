@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Fragment } from 'react';
 import Product from './Product.js';
 import ShoppingCartItem from './Components/ShoppingCartItem.js';
 import { Button, Container, GridList, GridListTile, Grid, Typography, Select, MenuItem, Drawer, Card, CardActionArea, CardContent} from '@material-ui/core';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import firebase from 'firebase/app';
 import 'firebase/database';
+import 'firebase/auth';
+import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 
 const App = () => {
   const [data, setData] = useState({});
@@ -15,6 +17,7 @@ const App = () => {
   const [products, setProducts] = useState([]);
   const [selectedSizes, setSelectedSizes] = useState([]);
   const [selectedSize, setSelectedSize] = useState({});
+  const [user, setUser] = useState("");
 
   var firebaseConfig = {
     apiKey: "AIzaSyC3_638-M3CjvK14uhSIrrCUXn98VLgYRI",
@@ -25,10 +28,24 @@ const App = () => {
     messagingSenderId: "196855447533",
     appId: "1:196855447533:web:ff33f3a9419f564c7c31e4"
   };
+
+  const uiConfig = {
+    signInFlow: 'popup',
+    signInOptions: [
+      firebase.auth.GoogleAuthProvider.PROVIDER_ID
+    ],
+    callbacks: {
+      signInSuccessWithAuthResult: () => false
+    }
+  };
   // Initialize Firebase
   if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
  }
+
+ useEffect(() => {
+  firebase.auth().onAuthStateChanged(setUser);
+}, []);
 
  const db = firebase.database().ref();
 
@@ -176,6 +193,23 @@ const App = () => {
             <Button size="small" selected={selectedSizes.includes(s)} onClick={() => sortBySize(s)}>{s}</Button>
           )}
         </Typography>
+
+        {(() => {
+          switch (user === "") {
+          case false:   return (
+            <Fragment>
+              <Typography style={{paddingTop:'20%'}}>Welcome back, {user.displayName}!</Typography>
+              <Button primary onClick={() => firebase.auth().signOut()}>
+                Log out
+              </Button>
+            </Fragment>
+          );
+          case true: return (<StyledFirebaseAuth
+            uiConfig={uiConfig}
+            firebaseAuth={firebase.auth()}
+          />);
+          }
+        })()}
       </Grid>
       <Grid item xs>
         <Container className="container">
