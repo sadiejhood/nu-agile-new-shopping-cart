@@ -17,7 +17,7 @@ const App = () => {
   const [products, setProducts] = useState([]);
   const [selectedSizes, setSelectedSizes] = useState([]);
   const [selectedSize, setSelectedSize] = useState({});
-  const [user, setUser] = useState("");
+  const [user, setUser] = useState({displayName: ""});
 
   var firebaseConfig = {
     apiKey: "AIzaSyC3_638-M3CjvK14uhSIrrCUXn98VLgYRI",
@@ -45,7 +45,7 @@ const App = () => {
 
  useEffect(() => {
   firebase.auth().onAuthStateChanged(setUser);
-}, []);
+  }, []);
 
  const db = firebase.database().ref();
 
@@ -198,7 +198,7 @@ const App = () => {
           switch (user === "") {
           case false:   return (
             <Fragment>
-              <Typography style={{paddingTop:'20%'}}>Welcome back, {user.displayName}!</Typography>
+              <Typography style={{paddingTop:'20%'}}>Welcome back!</Typography>
               <Button primary onClick={() => firebase.auth().signOut()}>
                 Log out
               </Button>
