@@ -15,9 +15,9 @@ const App = () => {
   const [shoppingCartItems, setShoppingCartItems] = useState({});
   const [totalPrice, setTotalPrice] = useState(0);
   const [products, setProducts] = useState([]);
-  const [selectedSizes, setSelectedSizes] = useState([]);
+  const [selectedSizes] = useState([]);
   const [selectedSize, setSelectedSize] = useState({});
-  const [user, setUser] = useState({displayName: ""});
+  const [user, setUser] = useState(null);
 
   var firebaseConfig = {
     apiKey: "AIzaSyC3_638-M3CjvK14uhSIrrCUXn98VLgYRI",
@@ -43,11 +43,18 @@ const App = () => {
     firebase.initializeApp(firebaseConfig);
  }
 
+ const dbInv = firebase.database().ref("inventory");
+ const dbCarts = firebase.database().ref();
+
+
  useEffect(() => {
   firebase.auth().onAuthStateChanged(setUser);
+  // console.log(user)
+  //add shopping cart items to users shopping cart
+  // db.ref('carts').child()
+
   }, []);
 
- const db = firebase.database().ref();
 
   // var products = Object.values(data);
   const sizes = ['S', 'M', 'L', 'XL']
@@ -66,18 +73,92 @@ const App = () => {
 
   useEffect(() => {
     const fetchInventory = async () => {
-      db.on('value', snap => {
-        if (snap.val()) setInventory((snap.val()));
+      dbInv.on('value', snap => {
+        if (snap.val()) {
+          setInventory((snap.val()));
+        } 
       }, error => alert(error));
-
-      console.log("updated!")
-
-      // const response = await fetch('./data/inventory.json');
-      // const json = await response.json();
-      // setInventory(json);
     };
     fetchInventory();
   }, []);
+
+  useEffect(() => {
+    dbCarts.on('value', snap => {
+      if (snap.val()) {
+        if (user && snap.val()["carts"] && snap.val()["carts"][user.uid]){
+          var newItems = snap.val()["carts"][user.uid][items]
+          if (newItems && newItems !== "None") {
+            Object.keys(newItems).forEach((items) => {
+              shoppingCartItems[items] = {
+                item: newItems[items].item, 
+                size: newItems[items].size,
+                quantity: newItems[items].quantity
+              }
+              setShoppingCartItems(shoppingCartItems)
+            })
+          }
+        }
+      }
+      fetchCartItems();
+      addToDBCart() 
+    }, error => alert(error));
+
+    // console.log(shoppingCartItems)
+  }, user);
+
+  useEffect(() => {
+    addToDBCart()
+  }, shoppingCartItems)
+
+  const fetchCartItems = async () => {
+    dbCarts.on('value', snap => {
+      if (snap.val()) {
+        if (user && snap.val()["carts"] && snap.val()["carts"][user.uid]){
+          var newItems = snap.val()["carts"][user.uid]["items"]
+
+          if (newItems) {
+            Object.keys(newItems).forEach((items) => {
+              shoppingCartItems[items] = {
+                item: newItems[items].item, 
+                size: newItems[items].size,
+                quantity: newItems[items].quantity
+              }
+              setShoppingCartItems(shoppingCartItems)
+            })
+          }
+        }
+      }
+    }, error => alert(error));
+  }
+
+  function addToDBCart() {
+    if (user) {
+      var cartItems = []
+      Object.keys(shoppingCartItems).forEach((item) => {
+        cartItems.push(shoppingCartItems[item])
+      })
+
+      if (cartItems.length === 0 || cartItems[0].item === undefined) {
+        if (cartItems[0] === undefined || cartItems[0].item === undefined) {
+          setShoppingCartItems({})
+        }
+        dbCarts.child("carts").child(user.uid).update({items: "None"}).then().catch()
+      } else {
+        dbCarts.child("carts").child(user.uid).update({items: cartItems}).then().catch()
+      }
+    }
+  }
+
+  function updateInventory() {
+    Object.keys(shoppingCartItems).forEach((item) => {
+      dbInv.child(item).update({
+        "S": inventory[item]["S"],
+        "M":  inventory[item]["M"],
+        "XL": inventory[item]["XL"],
+        "L": inventory[item]["L"]
+      })
+    })
+  }
 
   const flipCart = () => {
     setCartOpen(!cartOpen)
@@ -97,7 +178,7 @@ const App = () => {
   
     if (tempCart[product.sku] && tempCart[product.sku].size === size) {
       if (inventory[product.sku][size] <= 0) {
-        console.log(inventory[product.sku])
+        // console.log(inventory[product.sku])
         return
       } else {
         tempCart[product.sku].quantity = tempCart[product.sku].quantity + 1
@@ -106,7 +187,7 @@ const App = () => {
     } else {
       if (inventory[product.sku][size] <= 0) {
         // Do nothing
-        console.log(inventory[product.sku])
+        // console.log(inventory[product.sku])
         return
       } else {
         tempCart[product.sku] = {item: product, quantity: 1, size: size}
@@ -116,13 +197,13 @@ const App = () => {
   
     var tempInventory = {...inventory}
     tempInventory[product.sku][size] -= 1;
-    console.log(inventory)
+    // console.log(inventory)
     setInventory(tempInventory)
-    console.log(inventory)
+    // console.log(inventory)
     sortBySize('')
     setShoppingCartItems(tempCart);
 
-    console.log(inventory[product.sku])
+    // console.log(inventory[product.sku])
   };
 
   function removeFrom(product, size) {
@@ -159,7 +240,7 @@ const App = () => {
     }
 
     var tempProducts = []
-    console.log(inventory)
+    // console.log(inventory)
     Object.keys(inventory).forEach((item) => {
       var sizePresent = false
       selectedSizes.forEach((sizes) => {
@@ -176,9 +257,7 @@ const App = () => {
     if (selectedSizes.length === 0) {
       tempProducts = Object.values(data)
     }
-
     setProducts(tempProducts);
-
   }
 
 
@@ -190,16 +269,16 @@ const App = () => {
         </Typography>
         <Typography>
           {sizes.map(s => 
-            <Button size="small" selected={selectedSizes.includes(s)} onClick={() => sortBySize(s)}>{s}</Button>
+            <Button key={s} size="small" selected={selectedSizes.includes(s)} onClick={() => sortBySize(s)}>{s}</Button>
           )}
         </Typography>
 
         {(() => {
-          switch (user === "") {
+          switch (user == null) {
           case false:   return (
             <Fragment>
-              <Typography style={{paddingTop:'20%'}}>Welcome back!</Typography>
-              <Button primary onClick={() => firebase.auth().signOut()}>
+              <Typography style={{paddingTop:'20%'}}>Welcome back, {user.displayName}!</Typography>
+              <Button onClick={() => firebase.auth().signOut()}>
                 Log out
               </Button>
             </Fragment>
@@ -208,6 +287,7 @@ const App = () => {
             uiConfig={uiConfig}
             firebaseAuth={firebase.auth()}
           />);
+          default: return;
           }
         })()}
       </Grid>
@@ -265,17 +345,21 @@ const App = () => {
           <Grid item style={{height: '60%', overflow: 'scroll'}}>
             {
               Object.keys(shoppingCartItems).map((item) => {
-                return (
-                  <Typography key={shoppingCartItems[item].item.sku}>
-                    <Card style={{paddingLeft: '2%', height:'200px'}}>
-                      <ShoppingCartItem item={[shoppingCartItems[item].item, shoppingCartItems[item].quantity, shoppingCartItems[item].size]} />
-                      <div style={{paddingLeft: '60%'}}>
-                        <Button onClick={() => removeFrom(shoppingCartItems[item].item, shoppingCartItems[item].size)}> - </Button>
-                        <Button onClick={() => addToCart(shoppingCartItems[item].item, shoppingCartItems[item].size)}> + </Button>
-                      </div>
-                    </Card>
-                  </Typography>
-                )
+                // console.log(item)
+                if (item != 0 && item != 1) {
+                  return (
+                    <Typography key={shoppingCartItems[item].item.sku}>
+                      <Card style={{paddingLeft: '2%', height:'200px'}}>
+                        <ShoppingCartItem item={[shoppingCartItems[item].item, shoppingCartItems[item].quantity, shoppingCartItems[item].size]} />
+                        <div style={{paddingLeft: '60%'}}>
+                          <Button onClick={() => removeFrom(shoppingCartItems[item].item, shoppingCartItems[item].size)}> - </Button>
+                          <Button onClick={() => addToCart(shoppingCartItems[item].item, shoppingCartItems[item].size)}> + </Button>
+                        </div>
+                      </Card>
+                    </Typography>
+                  )
+                }
+                return; 
               })
             }   
           </Grid>
@@ -292,7 +376,15 @@ const App = () => {
                   </Typography>
               </CardContent>
               <CardActionArea>
-                <Button fullWidth={true}> CHECKOUT </Button>
+                <Button fullWidth={true} onClick={() => {
+                    updateInventory()
+                    setShoppingCartItems({}); 
+                    setTotalPrice(0);
+                    // if (user){
+                    //   dbCarts.child("carts").child(user.uid).update({items: "None"}).then().catch();
+                    // }
+                  }
+                }> CHECKOUT </Button>
               </CardActionArea>
             </Card>
           </div>

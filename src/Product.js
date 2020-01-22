@@ -1,18 +1,17 @@
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useState, Fragment } from 'react';
 import { CardMedia, CardContent, Typography} from '@material-ui/core';
-import {ToggleButton, ToggleButtonGroup, Alert} from '@material-ui/lab'
+import {ToggleButton, ToggleButtonGroup} from '@material-ui/lab'
 
 const Product = ({ product }) => {
     const [inventory, setInventory] = useState({})
     const [size, setSize] = useState("");
     const fullImageLocation = "/data/" + product[0].sku + "_1.jpg";
-    const thumbnailImageLocation = "/data/" + product[0].sku + "_2.jpg";
 
     const sizes = ["S", "M", "L", "XL"];
 
-    const currentSize = () => {
-        return size
-    }
+    // const currentSize = () => {
+    //     return size
+    // }
 
     function changeSize(size) {
         setInventory(product[1])
@@ -38,6 +37,7 @@ const Product = ({ product }) => {
                 switch (product[0].isFreeShipping) {
                 case true:   return (<Typography style={{textAlign: 'right'}}> Free Shipping </Typography>);
                 case false: return (<Typography style={{paddingTop: '10%'}}>  </Typography>);
+                default: return;
                 }
             })()}
         </CardContent>
@@ -51,13 +51,13 @@ const Product = ({ product }) => {
             <ToggleButtonGroup exclusive value={'left'}>
                 {
                     sizes.map((s) => 
-                        <ToggleButton selected={size === s} onClick={() => changeSize(s)}>
+                        <ToggleButton key={s} selected={size === s} onClick={() => changeSize(s)} value={'left'}>
                             {s}
                         </ToggleButton>
                     )
                 }
             </ToggleButtonGroup>
-            <Typography style={{fontSize: '15px'}}>
+            <Typography style={{fontSize: '15px'}} >
                 {product[0].title}
             </Typography>
             <Typography>

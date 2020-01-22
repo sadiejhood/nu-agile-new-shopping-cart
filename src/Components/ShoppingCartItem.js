@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Card, CardMedia, CardContent, Typography, Container } from '@material-ui/core';
+import React from 'react';
+import { CardMedia, CardContent, Typography, Container } from '@material-ui/core';
 
 const ShoppingCartItem = ({item}) => {
 
